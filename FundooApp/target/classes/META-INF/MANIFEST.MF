@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: LoginRegistration21
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: admin28
+Implementation-Vendor-Id: com.springBoot
+Build-Jdk: 1.8.0_222
+Implementation-URL: https://projects.spring.io/spring-boot/#/spring-bo
+ ot-starter-parent/LoginRegistration21
+Created-By: Maven Integration for Eclipse
+

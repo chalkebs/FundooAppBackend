@@ -1,0 +1,182 @@
+{
+  "groups": [
+    {
+      "name": "",
+      "type": "com.fundoo.user.model.NoteEntity",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "",
+      "type": "com.fundoo.user.model.UserEntity",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    },
+    {
+      "name": "",
+      "type": "com.fundoo.user.model.CollaboratorsEntity",
+      "sourceType": "com.fundoo.user.model.CollaboratorsEntity"
+    }
+  ],
+  "properties": [
+    {
+      "name": "archive-note",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "collaborators-id",
+      "type": "java.lang.Long",
+      "sourceType": "com.fundoo.user.model.CollaboratorsEntity"
+    },
+    {
+      "name": "collaborators-name",
+      "type": "java.lang.String",
+      "sourceType": "com.fundoo.user.model.CollaboratorsEntity"
+    },
+    {
+      "name": "collabs",
+      "type": "java.util.List<com.fundoo.user.model.CollaboratorsEntity>",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "collabs",
+      "type": "java.util.List<com.fundoo.user.model.CollaboratorsEntity>",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    },
+    {
+      "name": "color",
+      "type": "java.lang.String",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "creation-time",
+      "type": "java.util.Date",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "date-time",
+      "type": "java.time.LocalDateTime",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "email-id",
+      "type": "java.lang.String",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    },
+    {
+      "name": "file-name",
+      "type": "java.lang.String",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "file-name",
+      "type": "java.lang.String",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    },
+    {
+      "name": "first-name",
+      "type": "java.lang.String",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    },
+    {
+      "name": "labels",
+      "type": "java.util.List<com.fundoo.user.model.LabelEntity>",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "labels",
+      "type": "java.util.List<com.fundoo.user.model.LabelEntity>",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    },
+    {
+      "name": "last-name",
+      "type": "java.lang.String",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    },
+    {
+      "name": "mobile-num",
+      "type": "java.lang.String",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    },
+    {
+      "name": "note-data",
+      "type": "java.lang.String",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "note-id",
+      "type": "java.lang.Long",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "note-id",
+      "type": "java.lang.Long",
+      "sourceType": "com.fundoo.user.model.CollaboratorsEntity"
+    },
+    {
+      "name": "note-title",
+      "type": "java.lang.String",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "notes",
+      "type": "java.util.List<com.fundoo.user.model.NoteEntity>",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    },
+    {
+      "name": "notes",
+      "type": "java.util.List<com.fundoo.user.model.NoteEntity>",
+      "sourceType": "com.fundoo.user.model.CollaboratorsEntity"
+    },
+    {
+      "name": "password",
+      "type": "java.lang.String",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    },
+    {
+      "name": "pin-note",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "register-date",
+      "type": "java.time.LocalDateTime",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    },
+    {
+      "name": "trash-note",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "trashed-time",
+      "type": "java.time.LocalDateTime",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "updation-time",
+      "type": "java.util.Date",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "user-entity-id",
+      "type": "java.lang.Long",
+      "sourceType": "com.fundoo.user.model.NoteEntity"
+    },
+    {
+      "name": "user-entity-id",
+      "type": "java.lang.Long",
+      "sourceType": "com.fundoo.user.model.CollaboratorsEntity"
+    },
+    {
+      "name": "user-id",
+      "type": "java.lang.Long",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    },
+    {
+      "name": "verify",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.fundoo.user.model.UserEntity"
+    }
+  ],
+  "hints": []
+}
