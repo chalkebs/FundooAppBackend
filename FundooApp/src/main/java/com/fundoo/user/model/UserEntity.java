@@ -45,8 +45,8 @@ public class UserEntity
 	private String password;
 	private String mobileNum;
 	private boolean isVerify;
-	private String fileName;
-
+	private String imageUrl;
+	
 	private LocalDateTime registerDate = LocalDateTime.now();
 	
 	@JsonIgnore
@@ -73,14 +73,14 @@ public class UserEntity
 		this.collabs = collabs;
 	}
 
-	public String getFileName() 
+	public String getImageUrl() 
 	{
-		return fileName;
+		return imageUrl;
 	}
 
-	public void setFileName(String fileName) 
+	public void setImageUrl(String imageUrl) 
 	{
-		this.fileName = fileName;
+		this.imageUrl = imageUrl;
 	}
 
 	public List<LabelEntity> getLabels() 

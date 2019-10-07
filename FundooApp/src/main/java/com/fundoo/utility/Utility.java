@@ -49,26 +49,5 @@ public class Utility
 		return "Mail Sent Success!";
 		  
 	}
-
-	public static String sendConfirmationEmail(String toEmail, String subject, String body) 
-	{
-		MimeMessage message = javaMailSender.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(message);
-		
-		try 
-		{
-			helper.setFrom("bhagyashrichalke21@gmail.com");
-		    helper.setTo(toEmail);
-		    helper.setText(body);
-		    helper.setSubject(subject);
-		} 
-		catch (MessagingException e) 
-		{
-		    e.printStackTrace();
-		    return "Error while sending mail ..";
-		}
-		javaMailSender.send(message);
-		return "Mail Sent Success!";
-	}
 	
 }

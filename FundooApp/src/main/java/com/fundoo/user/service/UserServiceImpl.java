@@ -16,7 +16,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,11 +29,14 @@ import javax.validation.Valid;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,11 +44,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fundoo.elasticSearch.ElasticSearchDao;
 import com.fundoo.exception.NoteNotFoundException;
 import com.fundoo.exception.UserException;
+import com.fundoo.rabbitMQ.MessageProducer;
+import com.fundoo.redis.RedisUtil;
 import com.fundoo.response.Response;
 import com.fundoo.response.ResponseOfToken;
 import com.fundoo.user.dto.CollaboratorDto;
@@ -99,12 +107,21 @@ public  class UserServiceImpl implements UserService
 	@Autowired
 	private Environment environment;
 	
-	private final Path fileLocation = Paths.get("/home/admin28/Desktop/ProfilePic");
+	@Value("${profile.key}")
+	private Path fileLocation;
 	
-	private final Path noteImageLocation = Paths.get("/home/admin28/Desktop/NoteImages");
+	@Value("${noteImage.key}")
+	private Path noteImageLocation;
 	
 	@Autowired
 	ElasticSearchDao elasticSearchDao;
+	
+	@Autowired
+	RedisUtil<List<String>> redisUtil;
+	
+	@Autowired
+    private MessageProducer messageProducer;
+	
 	
 	public UserServiceImpl(ElasticSearchDao elasticSearchDao) 
 	{
@@ -136,8 +153,9 @@ public  class UserServiceImpl implements UserService
 			user = userRepo.save(user);
 			
 			String token = tokenUtil.createToken(user.getUserId());
-			Utility.sendConfirmationEmail(user.getEmailId(),
-					"Registered Successfully!!! Please verify the Email...",
+			
+			//RabbitMQ implementation
+			messageProducer.sendMessage(user.getEmailId(),"Registered Successfully!!! Please verify the Email...",
 					"Click on below link for verification \n http://localhost:8080/users/"+token);
 			
 			statusResponse = ResponseHelper.statusResponse(200, "Registered Successfully");
@@ -148,6 +166,8 @@ public  class UserServiceImpl implements UserService
 
 	public ResponseOfToken UserLogin(Logindto loginDto)
 	{
+		clearRedisData();
+		
 		Optional<UserEntity> user = userRepo.findByEmailId(loginDto.getEmailId());
 		
 		ResponseOfToken response = new ResponseOfToken();
@@ -185,16 +205,12 @@ public  class UserServiceImpl implements UserService
 			boolean status = passwordEncoder.matches(password, user.get().getPassword());
 			
 			if (status == true) 
-			{
-				Optional<UserEntity> user1 = userRepo.findByEmailId(user.get().getEmailId());
-				String token = tokenUtil.createToken(user1.get().getUserId());
-				
+			{		
+				String token = tokenUtil.createToken(user.get().getUserId());
+
 				response.setStatusCode(200);
 				response.setStatusMessage("Successfully Logged In");
 				response.setToken(token);
-				response.setEmailId(user.get().getEmailId());
-				response.setFirstName(user1.get().getFirstName());
-				response.setLastName(user1.get().getLastName());
 				
 				return response;
 			}
@@ -266,11 +282,11 @@ public  class UserServiceImpl implements UserService
 		}
 	}
 	
-	 @Override
-	 public Response storeFile(String token, MultipartFile file) 
-	 {      
+	@Override
+	public Response storeFile(String token, MultipartFile file) 
+	{      
 	     Long id = tokenUtil.decodeToken(token);
-		 UserEntity user = userRepo.findById(id).orElseThrow(null);
+	     UserEntity user = userRepo.findById(id).orElseThrow(null);
 		 
 		 // Normalize file name
 		 String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -288,9 +304,22 @@ public  class UserServiceImpl implements UserService
 	         
 	         Path newTargetLocation = this.fileLocation.resolve(target);
 	         
-	         user.setFileName(target);
+	         user.setImageUrl(target);
 	         
 	         userRepo.save(user);
+				
+	         //Redis
+			 List<String> profile = new ArrayList<String>();
+				
+			 profile.add(user.getEmailId());
+			 profile.add(user.getFirstName());
+			 profile.add(user.getLastName());
+				
+			 Path file1 = this.fileLocation.resolve(user.getImageUrl()).normalize();
+			 profile.add(file1.toString());
+				
+			 redisUtil.putValue("profile", profile);
+			 //Redis
 	         
 	         Files.copy(file.getInputStream(), newTargetLocation, StandardCopyOption.REPLACE_EXISTING);
 	         
@@ -302,18 +331,46 @@ public  class UserServiceImpl implements UserService
 	      }
 	     
 	  }
-	 
-	@Override
-	public Resource displayProfilePic(String token) throws MalformedURLException 
-	{
-		Long id = tokenUtil.decodeToken(token);
-		UserEntity user = userRepo.findById(id).orElseThrow(null);
-		
-		Path file = this.fileLocation.resolve(user.getFileName()).normalize();
-        Resource resource = new UrlResource(fileLocation.toUri());
 
-		return resource;
+	@Override
+	public List<String> getUserProfile(String token) 
+	{
+		if(redisUtil.getValue("profile")==null)
+		{
+			Long id = tokenUtil.decodeToken(token);
+			Optional<UserEntity> user = userRepo.findById(id);
+			
+			List<String> profile = new ArrayList<String>();
+			
+			profile.add(user.get().getEmailId());
+			profile.add(user.get().getFirstName());
+			profile.add(user.get().getLastName());
+			
+			if(user.get().getImageUrl()==null)
+			{
+				profile.add(null);
+			} 
+			else
+			{
+				Path file = this.fileLocation.resolve(user.get().getImageUrl()).normalize();
+				profile.add(file.toString());
+			}
+			
+			redisUtil.putValue("profile", profile);
+			
+			return profile;
+		}
+		
+		return redisUtil.getValue("profile");	
 	}
+	
+	@Override
+	public Response clearRedisData() 
+	{
+		redisUtil.putValue("profile", null);
+		return ResponseHelper.statusResponse(200, "Successfully Cleared the data of Redis");
+	}
+
 	
 //
 //
@@ -321,7 +378,7 @@ public  class UserServiceImpl implements UserService
 //
 //	
 	@Override
-	public Response createLabel(@Valid LabelDto labelDto, String token) 
+	public Response createLabel(@RequestHeader String token,@Valid LabelDto labelDto) 
 	{
 		LabelEntity labelEntity = modelMapper.map(labelDto, LabelEntity.class);
 		
@@ -513,7 +570,7 @@ public  class UserServiceImpl implements UserService
 //
 	
 	@Override
-	public Response createNote(NoteDto noteDto, String token) 
+	public Response createNote(String token, NoteDto noteDto) 
 	{
 		
 		NoteEntity noteEntity = modelMapper.map(noteDto, NoteEntity.class);
@@ -532,7 +589,7 @@ public  class UserServiceImpl implements UserService
 		noteRepo.save(noteEntity);
 		userRepo.save(user.get());	
 		
-		elasticSearchDao.insertNote(noteEntity,token);
+		elasticSearchDao.insertNote(noteEntity, token);
 				
 		statusResponse = ResponseHelper.statusResponse(200, "Note Saved Successfully");
 		return statusResponse;

@@ -10,6 +10,7 @@ import javax.validation.Valid;
 
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fundoo.exception.UserException;
@@ -49,13 +50,15 @@ public interface UserService
 	
 	Response storeFile(String  token,MultipartFile file);
 	
-	Resource displayProfilePic(String token) throws MalformedURLException;
+	List<String> getUserProfile(String token);
+	
+	Response clearRedisData();
 		
 /*
  * Label
  */
 	
-	Response createLabel(@Valid LabelDto labelDto, String token);
+	Response createLabel(@RequestHeader String token,@Valid LabelDto labelDto);
 
 	List<LabelEntity> displayAllLabels(String token);
 
@@ -76,7 +79,7 @@ public interface UserService
  * Note
  */
 	
-	Response createNote(NoteDto noteDto, String token);
+	Response createNote(String token, NoteDto noteDto);
 
 	List<NoteEntity> displayNotes(String token);
 
@@ -145,6 +148,5 @@ public interface UserService
 	Response deleteReminderFromNote(String token, Long noteId);
 
 	Response checkTrashTimeOfNote(String token, Long noteId);
-
 
 }

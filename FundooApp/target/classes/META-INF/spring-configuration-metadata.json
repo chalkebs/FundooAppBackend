@@ -68,12 +68,12 @@
       "sourceType": "com.fundoo.user.model.NoteEntity"
     },
     {
-      "name": "file-name",
+      "name": "first-name",
       "type": "java.lang.String",
       "sourceType": "com.fundoo.user.model.UserEntity"
     },
     {
-      "name": "first-name",
+      "name": "image-url",
       "type": "java.lang.String",
       "sourceType": "com.fundoo.user.model.UserEntity"
     },

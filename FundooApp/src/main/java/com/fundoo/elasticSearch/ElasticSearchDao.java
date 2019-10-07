@@ -3,7 +3,6 @@ package com.fundoo.elasticSearch;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fundoo.redis.RedisUtil;
 import com.fundoo.user.model.NoteEntity;
 import com.fundoo.utility.TokenGenerator;
 
@@ -35,6 +35,9 @@ public class ElasticSearchDao
 {
 	@Autowired
 	private TokenGenerator tokenUtil;
+	
+	@Autowired
+	private RedisUtil<String> redisUtil;
 	
 	private final String INDEX = "loginreg";
 	private final String TYPE = "noteentity";  
@@ -70,9 +73,9 @@ public class ElasticSearchDao
 		return response;
 	}
 
-	public List<NoteEntity> searchNote(String token, String noteTitle) throws IOException 
+	public List<NoteEntity> searchNote(String noteTitle) throws IOException 
 	{
-		Long id = tokenUtil.decodeToken(token);
+		Long id = tokenUtil.decodeToken(redisUtil.getValue("token"));
 		
 		SearchRequest searchRequest = new SearchRequest();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -86,11 +89,11 @@ public class ElasticSearchDao
         searchRequest.source(searchSourceBuilder);
 
         SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-        
-        return getSearchResult(response);
+                
+        return searchResult(response);
 	}
 
-	private List<NoteEntity> getSearchResult(SearchResponse response) 
+	private List<NoteEntity> searchResult(SearchResponse response) 
 	{
         SearchHit[] searchHit = response.getHits().getHits();
 
@@ -98,12 +101,8 @@ public class ElasticSearchDao
 
         if (searchHit.length > 0) 
         {
-            Arrays.stream(searchHit)
-                    .forEach(hit -> notes
-                            .add(objectMapper
-                                    .convertValue(hit.getSourceAsMap(),
-                                                    NoteEntity.class))
-                    );
+            Arrays.stream(searchHit).forEach(hit -> notes.add(objectMapper.convertValue(hit.getSourceAsMap(), 
+            		NoteEntity.class)));
         }
 
         return notes;
@@ -115,30 +114,26 @@ public class ElasticSearchDao
 		UpdateRequest updateRequest = new UpdateRequest(INDEX, TYPE, noteId.toString())
 				.fetchSource(true); // Fetch Object after its update
 		
-		Map<String, Object> error = new HashMap<>();
-		
-		error.put("Error", "Unable to update note");
 		try 
 		{
 			String noteJson = objectMapper.writeValueAsString(noteEntity);
-			
 			updateRequest.doc(noteJson, XContentType.JSON);
+			
 			UpdateResponse updateResponse = restHighLevelClient.update(updateRequest,RequestOptions.DEFAULT);
 			
-			Map<String, Object> sourceAsMap = updateResponse.getGetResult().sourceAsMap();
-			
+			Map<String, Object> sourceAsMap = updateResponse.getGetResult().sourceAsMap();			
 			return sourceAsMap;
 		}
 		catch (JsonProcessingException e)
 		{
 			e.getMessage();
+			return null;
 		} 
 		catch (java.io.IOException e)
 		{
 			e.getLocalizedMessage();
-			return error;
+			return null;
 		}
-		return error;
 	}
 
 	public DeleteResponse deleteNote(Long noteId, String token) 
