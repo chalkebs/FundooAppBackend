@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fundoo.redis.RedisUtil;
 import com.fundoo.user.model.NoteEntity;
 import com.fundoo.utility.TokenGenerator;
 
@@ -36,10 +35,7 @@ public class ElasticSearchDao
 	@Autowired
 	private TokenGenerator tokenUtil;
 	
-	@Autowired
-	private RedisUtil<String> redisUtil;
-	
-	private final String INDEX = "loginreg";
+	private final String INDEX = "loginregistration";
 	private final String TYPE = "noteentity";  
 	private RestHighLevelClient restHighLevelClient;
 	private ObjectMapper objectMapper;
@@ -73,22 +69,28 @@ public class ElasticSearchDao
 		return response;
 	}
 
-	public List<NoteEntity> searchNote(String noteTitle) throws IOException 
+	public List<NoteEntity> searchNote(String token, String searchField) throws IOException 
 	{
-		Long id = tokenUtil.decodeToken(redisUtil.getValue("token"));
+		Long id = tokenUtil.decodeToken(token);
+		
+		System.out.println("ElasticSearchDao.searchNote()");
 		
 		SearchRequest searchRequest = new SearchRequest();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         
+        System.out.println(searchField);
+        
         searchSourceBuilder.query(QueryBuilders.boolQuery()
         				.must(QueryBuilders.termQuery("userEntityId", id))
-        				.must(QueryBuilders.queryStringQuery("*" + noteTitle + "*")
+        				.must(QueryBuilders.queryStringQuery("*" + searchField + "*")
                         .field("noteTitle")
                         .field("noteData")));
         
         searchRequest.source(searchSourceBuilder);
 
         SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        
+        System.out.println(response);
                 
         return searchResult(response);
 	}
@@ -104,7 +106,7 @@ public class ElasticSearchDao
             Arrays.stream(searchHit).forEach(hit -> notes.add(objectMapper.convertValue(hit.getSourceAsMap(), 
             		NoteEntity.class)));
         }
-
+        
         return notes;
     }
 	

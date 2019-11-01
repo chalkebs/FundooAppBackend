@@ -12,16 +12,16 @@ public class MessageProducer
 {
 	@Autowired
     private RabbitTemplate rabbitTemplate;
- 
-	public void sendMessage(String emailId, String subject, String body) 
+	 
+	public void sendMessage(String emailId, String subject, String text) 
 	{
-		List<String> list = new ArrayList<String>();
+		List<String> email = new ArrayList<String>();
 		
-		list.add(emailId);
-		list.add(subject);
-		list.add(body);
+		email.add(emailId);
+		email.add(text);
+		email.add(subject);
 		
-		rabbitTemplate.convertAndSend(RabbitMQProducerConfig.ROUTING_KEY, list);
+		rabbitTemplate.convertAndSend(RabbitMQProducerConfig.ROUTING_KEY, email);
      	System.out.println("Is listener returned ::: "+rabbitTemplate.isReturnListener());
 	}
 	

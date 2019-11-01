@@ -29,9 +29,11 @@ public class CollaboratorsEntity
 	@NotBlank
 	private String collaboratorsName;
 	
-	private Long noteId;
+	private Long noteEntityId;
 	
 	private Long userEntityId;
+	
+	private String ImageUrl;
 	
 	@JsonIgnore
 	@ManyToMany
@@ -67,22 +69,30 @@ public class CollaboratorsEntity
 		this.collaboratorsName = collaboratorsName;
 	}
 
-	public Long getNoteId() 
-	{
-		return noteId;
-	}
-
-	public void setNoteId(Long noteId) 
-	{
-		this.noteId = noteId;
-	}
-
 	public Long getUserEntityId() {
 		return userEntityId;
 	}
 
 	public void setUserEntityId(Long userEntityId) {
 		this.userEntityId = userEntityId;
+	}
+
+	public Long getNoteEntityId() 
+	{
+		return noteEntityId;
+	}
+
+	public void setNoteEntityId(Long noteEntityId) 
+	{
+		this.noteEntityId = noteEntityId;
+	}
+
+	public String getImageUrl() {
+		return ImageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		ImageUrl = imageUrl;
 	}
 	
 }

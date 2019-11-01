@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class MessageListenerImpl
 {
-	private static JavaMailSender javaMailSender;
+	private JavaMailSender javaMailSender;
 	
 	public MessageListenerImpl(JavaMailSender javaMailSender) 
 	{
-		MessageListenerImpl.javaMailSender = javaMailSender;
+		this.javaMailSender = javaMailSender;
     }
 	
 	public void onMessage(List<String> list) 
@@ -30,8 +30,8 @@ public class MessageListenerImpl
 		{
 			helper.setFrom("bhagyashrichalke21@gmail.com");
 		    helper.setTo(list.get(0));
-		    helper.setText(list.get(2));
-		    helper.setSubject(list.get(1));
+		    helper.setText(list.get(1));
+		    helper.setSubject(list.get(2));
 		} 
 		catch (MessagingException e) 
 		{

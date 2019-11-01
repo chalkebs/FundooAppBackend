@@ -11,12 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ElasticSearchConfig extends AbstractFactoryBean
 {    
-    @Value("${spring.data.elasticsearch.cluster-nodes}")
-    private String clusterNodes;
-    
-    @Value("${spring.data.elasticsearch.cluster-name}")
-    private String clusterName;
-    
     @Value("${elasticsearch.host}")
     private String host;
     
